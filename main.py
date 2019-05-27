@@ -4,14 +4,15 @@
 # The application should be able to take a gps point (lon-lat) and return a
 #   list of crimes made within a radius of 5 km.
 
-# The data output should be readable (for normal users).
+# TODO The data output should be readable (for normal users).
 
-# The application should furthermore be able to add new records to the dataset.
+# TODO The application should furthermore be able to add new records to the dataset.
 #   (this includes writing to the csv file.)
 
-# The application should be able to export the whole dataset into json and html
+# TODO The application should be able to export the whole dataset into json and html
 #   formats, and should be able to export search results in json and and html
 #   formats as well.
+
 import csv
 
 file = open('SacramentocrimeJanuary2006.csv', 'r')
