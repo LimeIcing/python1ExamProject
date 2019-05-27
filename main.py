@@ -13,7 +13,6 @@
 #   formats, and should be able to export search results in json and and html
 #   formats as well.
 import csv
-import sys
 
 file = open('SacramentocrimeJanuary2006.csv', 'r')
 reader = csv.reader(file, delimiter=',')
@@ -70,46 +69,49 @@ def search():
 
 
 def search_by_date():
-    input_date = input('Please input date in this format: "MM/DD/YY"\n').split('/')
-    if len(input_date[0]) < 1:
-        print("You didn't input anything...")
-        return
+    is_running = True
 
-    search_date = ""
-    d_i = 0
-    # Formatting the input to work with the search function
-    for i in input_date:
-        if d_i < 2:
-            if i[0] == '0':
-                search_date += i[1]
+    while is_running:
+        input_date = input('Please input date in this format: "MM/DD/YY"\n').split('/')
+        if len(input_date[0]) < 1:
+            print("You didn't input anything...")
+            return
+
+        search_date = ""
+        d_i = 0
+        # Formatting the input to work with the search function
+        for i in input_date:
+            if d_i < 2:
+                if i[0] == '0':
+                    search_date += i[1]
+                else:
+                    search_date += i
+                search_date += '/'
+                d_i += 1
             else:
-                search_date += i
-            search_date += '/'
-            d_i += 1
-        else:
-            if len(i) == 1:
-                search_date += ('0' + i)
-            else:
-                search_date += i
+                if len(i) == 1:
+                    search_date += ('0' + i)
+                else:
+                    search_date += i
 
-    print('Searching for crimes registered on {0}...'.format(search_date))
-    result_set = []
-    file.seek(0)  # Resetting the iterator
-    for row in reader:
-        if str(row[0]).startswith(search_date):
-            print(row)
-            result_set.append(row)
-
-    selection = input('Do you want to specify the search with a time of day? (y/N)\n')
-    if selection == 'y':
-        input_hour = input('Please input the hour in 24h time\n')
-        for row in result_set:
-            if str(row[0]).split(':')[0].endswith(input_hour):
+        print('Searching for crimes registered on {0}...'.format(search_date))
+        result_set = []
+        file.seek(0)  # Resetting the iterator
+        for row in reader:
+            if str(row[0]).startswith(search_date):
                 print(row)
+                result_set.append(row)
 
-    selection = input('Do you want to return to the previous menu? (Y/n)\n')
-    if selection == 'n':
-        sys.exit()
+        selection = input('Do you want to specify the search with a time of day? (y/N)\n')
+        if selection == 'y':
+            input_hour = input('Please input the hour in 24h time\n')
+            for row in result_set:
+                if str(row[0]).split(':')[0].endswith(input_hour):
+                    print(row)
+
+        selection = input('Do you want to search for a new date? (y/N)\n')
+        if selection != 'y':
+            is_running = False
 
 
 def search_by_address():
@@ -160,8 +162,8 @@ def search_by_address():
 def search_by_district():
     is_running = True
 
-    input_district = input('Please input district number\n')
     while is_running:
+        input_district = input('Please input district number\n')
         file.seek(0)  # Resetting the iterator
         for row in reader:
             if list(row)[2] == input_district:
@@ -175,8 +177,8 @@ def search_by_district():
 def search_by_beat():
     is_running = True
 
-    input_beat = input('Please input beat\n').upper()
     while is_running:
+        input_beat = input('Please input beat\n').upper()
         file.seek(0)  # Resetting the iterator
         for row in reader:
             if list(row)[3] == input_beat:
@@ -190,8 +192,8 @@ def search_by_beat():
 def search_by_grid():
     is_running = True
 
-    input_grid = input('Please input grid number\n')
     while is_running:
+        input_grid = input('Please input grid number\n')
         file.seek(0)  # Resetting the iterator
         for row in reader:
             if list(row)[4] == input_grid:
@@ -237,8 +239,8 @@ def search_by_description():
 def search_by_ucr():
     is_running = True
 
-    input_ucr = input('Please input UCR number\n')
     while is_running:
+        input_ucr = input('Please input UCR number\n')
         file.seek(0)  # Resetting the iterator
         for row in reader:
             if list(row)[6] == input_ucr:
@@ -249,9 +251,31 @@ def search_by_ucr():
             is_running = False
 
 
-# TODO
 def search_by_radius():
-    pass
+    is_running = True
+
+    input_coordinate = input('Please input a coordinate separated by a comma (latitude,longitude)\n').split(',')
+    input_radius = float(input('Please input desired radius in miles\n')) * 0.0145  # converts miles to long/lat
+    while is_running:
+        file.seek(0)  # Resetting the iterator
+        file.__next__()  # Avoids the header row
+        for row in reader:
+            if float(row[7]) - float(input_coordinate[0]) <= input_radius and \
+                    float(input_coordinate[0]) - float(row[7]) <= input_radius:
+                if float(row[8]) - float(input_coordinate[1]) <= input_radius and \
+                        float(input_coordinate[1]) - float(row[8]) <= input_radius:
+                    print(row)
+
+        selection = input('What do you want to do now?\n'
+                          '1 - Input new coordinate\n'
+                          '2 - Adjust radius\n'
+                          '0 - Go back to the previous menu\n')
+        if selection == '1':
+            input_coordinate = input('Please input a coordinate separated by a comma (latitude,longitude)\n').split(',')
+        elif selection == '2':
+            input_radius = float(input('Please input desired radius in miles\n')) * 0.0145  # converts miles to long/lat
+        else:
+            is_running = False
 
 
 # Helper function to exit menus
