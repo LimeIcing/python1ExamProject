@@ -32,7 +32,7 @@ def welcome():
     is_running = should_run(selection)
     while is_running:
         options[selection]()
-        print('Is there anything else?\n' + menu)
+        print('Is there anything else you want to do?\n' + menu)
         selection = input()
         is_running = should_run(selection)
 
@@ -47,7 +47,7 @@ def search():
         '4': search_by_beat,
         '5': search_by_grid,
         '6': search_by_description,
-        '7': search_by_ucr_ncic,
+        '7': search_by_ucr,
         '8': search_by_radius
     }
     menu = '1 - Date and time\n' \
@@ -143,43 +143,110 @@ def search_by_address():
                         break
 
         selection = input('What do you want to do now?\n'
-                          '1 - Widen current search'
-                          '2 - Narrow current search'
-                          '3 - Make a new address search'
-                          '0 - Go back to the previous menu')
+                          '1 - Widen current search\n'
+                          '2 - Narrow current search\n'
+                          '3 - Make a new address search\n'
+                          '0 - Go back to the previous menu\n')
         if selection == '1':
-            input_address.extend(input('Please input address\n').upper().split(' '))
+            input_address.extend(input('Please input additional search terms\n').upper().split(' '))
         elif selection == '2':
-            pass # TODO Make function to narrow address search
+            pass  # TODO Make function to narrow address search
         elif selection == '3':
             input_address = input('Please input address\n').upper().split(' ')
         else:
             is_running = False
 
 
-# TODO
 def search_by_district():
-    pass
+    is_running = True
+
+    input_district = input('Please input district number\n')
+    while is_running:
+        file.seek(0)  # Resetting the iterator
+        for row in reader:
+            if list(row)[2] == input_district:
+                print(row)
+
+        selection = input('Do you wish to search in another district? (y/N)\n')
+        if selection != 'y':
+            is_running = False
 
 
-# TODO
 def search_by_beat():
-    pass
+    is_running = True
+
+    input_beat = input('Please input beat\n').upper()
+    while is_running:
+        file.seek(0)  # Resetting the iterator
+        for row in reader:
+            if list(row)[3] == input_beat:
+                print(row)
+
+        selection = input('Do you wish to search for another beat? (y/N)\n')
+        if selection != 'y':
+            is_running = False
 
 
-# TODO
 def search_by_grid():
-    pass
+    is_running = True
+
+    input_grid = input('Please input grid number\n')
+    while is_running:
+        file.seek(0)  # Resetting the iterator
+        for row in reader:
+            if list(row)[4] == input_grid:
+                print(row)
+
+        selection = input('Do you wish to search in another grid? (y/N)\n')
+        if selection != 'y':
+            is_running = False
 
 
-# TODO
 def search_by_description():
-    pass
+    is_running = True
+
+    input_description = input('Please input search terms\n').upper().split(' ')
+    while is_running:
+        i = 0
+        for keyword in input_description:
+            input_description[i] = keyword.replace('+', ' ')
+            i += 1
+
+        file.seek(0)  # Resetting the iterator
+        for row in reader:
+            for keyword in input_description:
+                if list(row)[5].__contains__(keyword):
+                    print(row)
+                    break
+
+        selection = input('What do you want to do now?\n'
+                          '1 - Widen current search\n'
+                          '2 - Narrow current search\n'
+                          '3 - Make a new description search\n'
+                          '0 - Go back to the previous menu\n')
+        if selection == '1':
+            input_description.extend(input('Please input additional search terms\n').upper().split(' '))
+        elif selection == '2':
+            pass  # TODO Make function to narrow description search
+        elif selection == '3':
+            input_description = input('Please input address\n').upper().split(' ')
+        else:
+            is_running = False
 
 
-# TODO
-def search_by_ucr_ncic():
-    pass
+def search_by_ucr():
+    is_running = True
+
+    input_ucr = input('Please input UCR number\n')
+    while is_running:
+        file.seek(0)  # Resetting the iterator
+        for row in reader:
+            if list(row)[6] == input_ucr:
+                print(row)
+
+        selection = input('Do you wish to search for another UCR number? (y/N)\n')
+        if selection != 'y':
+            is_running = False
 
 
 # TODO
