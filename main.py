@@ -30,7 +30,14 @@ def welcome():
 
 def search():
     options = {
-        '1': search_by_date
+        '1': search_by_date,
+        '2': search_by_address,
+        '3': search_by_district,
+        '4': search_by_beat,
+        '5': search_by_grid,
+        '6': search_by_description,
+        '7': search_by_ucr_ncic,
+        '8': search_by_radius
     }
     print("You've chosen search! Please select what you wish to search by:\n"
           "1 - Date and time\n"
@@ -40,7 +47,7 @@ def search():
           "5 - Grid\n"
           "6 - Description\n"
           "7 - UCR NCIC code\n"
-          "8 - Radius"
+          "8 - Radius\n"
           "0 - Go back...")
     options[input()]()
 
@@ -65,7 +72,7 @@ def search_by_date():
             else:
                 search_date += i
 
-    print('Searching for crimes registered on {0}'.format(search_date))
+    print('Searching for crimes registered on {0}...'.format(search_date))
 
     for row in reader:
         if str(row[0]).startswith(search_date):
@@ -73,7 +80,32 @@ def search_by_date():
 
 
 def search_by_address():
-    pass
+    address_abbreviations = {'AVENUE': 'AVE', 'BOULEVARD': 'BLVD', 'CENTER': 'CTR', 'CIRCLE': 'CIR', 'COURT': 'CT',
+                             'DRIVE': 'DR', 'EXPRESSWAY': 'EXPY', 'HEIGHTS': 'HTS', 'HIGHWAY': 'HWY', 'ISLAND': 'IS',
+                             'JUNCTION': 'JCT', 'LAKE': 'LK', 'LANE': 'LN', 'MOUNTAIN': 'MTN', 'PARKWAY': 'PKWY',
+                             'PLACE': 'PL', 'PLAZA': 'PLZ', 'RIDGE': 'RDG', 'ROAD': 'RD', 'SQUARE': 'SQ',
+                             'STREET': 'ST', 'STATION': 'STA', 'TERRACE': 'TER', 'TRAIL': 'TRL', 'TURNPIKE': 'TPKE',
+                             'VALLEY': 'VLY',
+                             'APARTMENT': 'APT', 'ROOM': 'RM', 'SUITE': 'STE',
+                             'NORTH': 'N', 'EAST': 'E', 'SOUTH': 'WEST', 'NORTHEAST': 'NE', 'NORTHWEST': 'NW',
+                             'SOUTHEAST': 'SE', 'SOUTHWEST': 'SW'}
+
+    input_address = input('Please input address\n').upper().split(' ')
+    i = 0
+    for keyword in input_address:
+        input_address[i] = keyword.replace('+', ' ')
+        i += 1
+
+    for row in reader:
+        for keyword in input_address:
+            if list(row)[1].__contains__(keyword):
+                print(row)
+                break
+            elif list(address_abbreviations.keys()).__contains__(keyword):
+                if list(row)[1].__contains__(address_abbreviations[keyword]):
+                    print(row)
+                    break
+    print(input_address)
 
 
 def search_by_district():
