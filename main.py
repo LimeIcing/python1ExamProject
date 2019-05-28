@@ -283,19 +283,18 @@ def search_by_radius():
 
 
 def new_entry():
-    file = open('SacramentocrimeJanuary2006.csv', 'a')
-    writer = csv.writer(file, delimiter=',')
+    file_write = open('SacramentocrimeJanuary2006.csv', 'a')
+    writer = csv.writer(file_write, delimiter=',')
     base_query = 'Please input {0}\n'
     new_row = []
     is_correct = False
 
     while not is_correct:
-        date_fragment_list = []
-        date_fragment_list.append(input(base_query.format('month')).upper() + '/')
-        date_fragment_list.append(input(base_query.format('day of month')) + '/')
-        date_fragment_list.append(input(base_query.format('year')) + ' ')
-        date_fragment_list.append(input(base_query.format('hour')) + ':')
-        date_fragment_list.append(input(base_query.format('minute')))
+        date_fragment_list = [input(base_query.format('month')).upper() + '/',
+                              input(base_query.format('day of month')) + '/',
+                              input(base_query.format('year')) + ' ',
+                              input(base_query.format('hour')) + ':',
+                              input(base_query.format('minute'))]
 
         date = format_date(date_fragment_list)
         selection = input('Is this the correct date? (Y/n)' + date)
