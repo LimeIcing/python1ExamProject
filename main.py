@@ -21,9 +21,11 @@ reader = csv.reader(file, delimiter=',')
 
 def welcome():
     options = {
-        '1': search
+        '1': search,
+        '2': new_entry
     }
     menu = '1 - Search for a crime in the archive\n' \
+           '2 - Add a new record to the database\n' \
            '0 - Exit'
 
     print('Hello! Welcome to the Sacramento Police Database!\n'
@@ -37,6 +39,7 @@ def welcome():
         is_running = should_run(selection)
 
     print('Thank you for using the Sacramento Police Database!')
+    file.close()
 
 
 def search():
@@ -104,14 +107,14 @@ def search_by_date():
                 result_set.append(row)
 
         selection = input('Do you want to specify the search with a time of day? (y/N)\n')
-        if selection == 'y':
+        if selection.lower() == 'y':
             input_hour = input('Please input the hour in 24h time\n')
             for row in result_set:
                 if str(row[0]).split(':')[0].endswith(input_hour):
                     print(row)
 
         selection = input('Do you want to search for a new date? (y/N)\n')
-        if selection != 'y':
+        if selection.lower() != 'y':
             is_running = False
 
 
@@ -147,7 +150,7 @@ def search_by_address():
 
         selection = input('What do you want to do now?\n'
                           '1 - Widen current search\n'
-                          '2 - Narrow current search\n'
+                          '2 - Narrow current search (NOT AVAILABLE IN DEMO)\n'
                           '3 - Make a new address search\n'
                           '0 - Go back to the previous menu\n')
         if selection == '1':
@@ -171,7 +174,7 @@ def search_by_district():
                 print(row)
 
         selection = input('Do you wish to search in another district? (y/N)\n')
-        if selection != 'y':
+        if selection.lower() != 'y':
             is_running = False
 
 
@@ -186,7 +189,7 @@ def search_by_beat():
                 print(row)
 
         selection = input('Do you wish to search for another beat? (y/N)\n')
-        if selection != 'y':
+        if selection.lower() != 'y':
             is_running = False
 
 
@@ -201,7 +204,7 @@ def search_by_grid():
                 print(row)
 
         selection = input('Do you wish to search in another grid? (y/N)\n')
-        if selection != 'y':
+        if selection.lower() != 'y':
             is_running = False
 
 
@@ -224,7 +227,7 @@ def search_by_description():
 
         selection = input('What do you want to do now?\n'
                           '1 - Widen current search\n'
-                          '2 - Narrow current search\n'
+                          '2 - Narrow current search (NOT AVAILABLE IN DEMO)\n'
                           '3 - Make a new description search\n'
                           '0 - Go back to the previous menu\n')
         if selection == '1':
@@ -248,7 +251,7 @@ def search_by_ucr():
                 print(row)
 
         selection = input('Do you wish to search for another UCR number? (y/N)\n')
-        if selection != 'y':
+        if selection.lower() != 'y':
             is_running = False
 
 
@@ -279,7 +282,69 @@ def search_by_radius():
             is_running = False
 
 
-# Helper function to exit menus
+def new_entry():
+    file = open('SacramentocrimeJanuary2006.csv', 'a')
+    writer = csv.writer(file, delimiter=',')
+    base_query = 'Please input {0}\n'
+    new_row = []
+    is_correct = False
+
+    while not is_correct:
+        date_fragment_list = []
+        date_fragment_list.append(input(base_query.format('month')).upper() + '/')
+        date_fragment_list.append(input(base_query.format('day of month')) + '/')
+        date_fragment_list.append(input(base_query.format('year')) + ' ')
+        date_fragment_list.append(input(base_query.format('hour')) + ':')
+        date_fragment_list.append(input(base_query.format('minute')))
+
+        date = format_date(date_fragment_list)
+        selection = input('Is this the correct date? (Y/n)' + date)
+        if selection.lower() != 'n':
+            is_correct = True
+            new_row.append(date)
+
+    address = ''
+    district = ''
+    beat = ''
+    grid = ''
+    description = ''
+    ucr = ''
+    coordinates = ''
+
+    writer.writerow(new_row)
+
+
+# Helper function to format the date
+def format_date(date_fragment_list):
+    months = {'JANUARY': '1', 'FEBRUARY': '2', 'MARCH': '3', 'APRIL': '4', 'MAY': '5', 'JUNE': '6', 'JULY': '7',
+              'AUGUST': '8', 'SEPTEMBER': '9', 'OCTOBER': '10', 'NOVEMBER': '11', 'DECEMBER': '12'}
+
+    if len(date_fragment_list[0]) > 3:
+        date_fragment_list[0] = months[date_fragment_list[0][:-1]] + '/'
+
+    if len(date_fragment_list[1]) > 3:
+        date_fragment_list[1] = date_fragment_list[1][:2] + '/'
+
+    if len(date_fragment_list[2]) > 3:
+        date_fragment_list[2] = date_fragment_list[2][-3:]
+
+    if len(date_fragment_list[3]) > 3:
+        if date_fragment_list[3][-3:].upper() == 'AM:':
+            date_fragment_list[3] = date_fragment_list[3][:2] + ':'
+        elif date_fragment_list[3][-3:].upper() == 'PM:':
+            date_fragment_list[3] = str(int(date_fragment_list[3][:2]) + 12) + ':'
+
+    if len(date_fragment_list[4]) == 2:
+        date_fragment_list[4] = '0' + date_fragment_list[4]
+
+    date = ''
+    for fragment in date_fragment_list:
+        date += fragment
+
+    return date
+
+
+# Helper function to exit menu loops
 def should_run(user_input):
     if user_input == '0' or len(user_input) < 1:
         return False
