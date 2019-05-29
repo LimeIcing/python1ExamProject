@@ -14,18 +14,25 @@
 #   formats as well.
 
 import csv
+import json
 
 file = open('SacramentocrimeJanuary2006.csv', 'r')
 reader = csv.reader(file, delimiter=',')
+fieldnames = ['cdatetime', 'address', 'district', 'beat', 'grid',
+              'crimedescr', 'ucr_ncic_code', 'latitude', 'longitude']
 
 
 def welcome():
     options = {
         '1': search,
-        '2': new_entry
+        '2': new_entry,
+        '3': export_to_json,
+        '4': export_to_html
     }
     menu = '1 - Search for a crime in the archive\n' \
            '2 - Add a new record to the database\n' \
+           '3 - Export the database to json\n' \
+           '4 - Export the database to HTML\n' \
            '0 - Exit'
 
     print('Hello! Welcome to the Sacramento Police Database!\n'
@@ -285,9 +292,7 @@ def search_by_radius():
 # TODO Test for crashes via invalid input
 def new_entry():
     file_write = open('SacramentocrimeJanuary2006.csv', 'a', newline='')
-    writer = csv.DictWriter(file_write, delimiter=',',
-                            fieldnames=['cdatetime', 'address', 'district', 'beat', 'grid',
-                                        'crimedescr', 'ucr_ncic_code', 'latitude', 'longitude'])
+    writer = csv.DictWriter(file_write, delimiter=',', fieldnames=fieldnames)
     base_query = 'Please input {0}\n'
     base_example = 'Ex.: "{0}"\n'
     base_confirmation = 'Is this the correct {0} (Y/n)? {1}\n'
@@ -384,6 +389,18 @@ def new_entry():
                 is_unconfirmed = False
 
     file_write.close()
+
+
+def export_to_json():
+    dict_reader = csv.DictReader(file, delimiter=',', fieldnames=fieldnames)
+    file.seek(1)
+    out = json.dumps([row for row in dict_reader])
+    json_file = open('SacramentoCrimeDB.json', 'w')
+    json_file.write(out)
+
+
+def export_to_html():
+    pass
 
 
 # Helper function to format the date
