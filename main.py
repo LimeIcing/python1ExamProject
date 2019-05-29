@@ -4,7 +4,7 @@
 # The application should be able to take a gps point (lon-lat) and return a
 #   list of crimes made within a radius of 5 km.
 
-# TODO The data output should be readable (for normal users).
+# The data output should be readable (for normal users).
 
 # The application should furthermore be able to add new records to the dataset.
 #   (this includes writing to the csv file.)
