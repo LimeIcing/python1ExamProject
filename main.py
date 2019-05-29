@@ -6,7 +6,7 @@
 
 # TODO The data output should be readable (for normal users).
 
-# TODO The application should furthermore be able to add new records to the dataset.
+# The application should furthermore be able to add new records to the dataset.
 #   (this includes writing to the csv file.)
 
 # TODO The application should be able to export the whole dataset into json and html
@@ -282,14 +282,19 @@ def search_by_radius():
             is_running = False
 
 
+# TODO Test for crashes via invalid input
 def new_entry():
-    file_write = open('SacramentocrimeJanuary2006.csv', 'a')
-    writer = csv.writer(file_write, delimiter=',')
+    file_write = open('SacramentocrimeJanuary2006.csv', 'a', newline='')
+    writer = csv.DictWriter(file_write, delimiter=',',
+                            fieldnames=['cdatetime', 'address', 'district', 'beat', 'grid',
+                                        'crimedescr', 'ucr_ncic_code', 'latitude', 'longitude'])
     base_query = 'Please input {0}\n'
-    new_row = []
-    is_correct = False
+    base_example = 'Ex.: "{0}"\n'
+    base_confirmation = 'Is this the correct {0} (Y/n)? {1}\n'
+    new_row = {}
 
-    while not is_correct:
+    is_unconfirmed = True
+    while is_unconfirmed:
         date_fragment_list = [input(base_query.format('month')).upper() + '/',
                               input(base_query.format('day of month')) + '/',
                               input(base_query.format('year')) + ' ',
@@ -297,20 +302,88 @@ def new_entry():
                               input(base_query.format('minute'))]
 
         date = format_date(date_fragment_list)
-        selection = input('Is this the correct date? (Y/n)' + date)
+        selection = input(base_confirmation.format('date', date))
         if selection.lower() != 'n':
-            is_correct = True
-            new_row.append(date)
+            is_unconfirmed = False
+            new_row['cdatetime'] = date
 
-    address = ''
-    district = ''
-    beat = ''
-    grid = ''
-    description = ''
-    ucr = ''
-    coordinates = ''
+    is_unconfirmed = True
+    while is_unconfirmed:
+        address = input(base_query.format('address') + base_example.format('3421 AUBURN BLVD')).upper()
+        selection = input(base_confirmation.format('address', address))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            new_row['address'] = address
 
-    writer.writerow(new_row)
+    is_unconfirmed = True
+    while is_unconfirmed:
+        district = input(base_query.format('district number') + base_example.format('2'))
+        selection = input(base_confirmation.format('district', district))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            new_row['district'] = district
+
+    is_unconfirmed = True
+    while is_unconfirmed:
+        beat = input(base_query.format('beat') + base_example.format('2A')).upper()
+        selection = input(base_confirmation.format('beat', beat))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            new_row['beat'] = beat + '        '
+
+    is_unconfirmed = True
+    while is_unconfirmed:
+        grid = input(base_query.format('grid') + base_example.format('508'))
+        selection = input(base_confirmation.format('grid', grid))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            new_row['grid'] = grid
+
+    is_unconfirmed = True
+    while is_unconfirmed:
+        description = input(base_query.format('a description') +
+                            base_example.format('459 PC  BURGLARY-UNSPECIFIED')).upper()
+        selection = input(base_confirmation.format('description', description))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            new_row['crimedescr'] = description
+
+    is_unconfirmed = True
+    while is_unconfirmed:
+        ucr = input(base_query.format('UCR number') + base_example.format('2299'))
+        selection = input(base_confirmation.format('UCR number', ucr))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            new_row['ucr_ncic_code'] = ucr
+
+    is_unconfirmed = True
+    while is_unconfirmed:
+        coordinates = input(base_query.format('coordinates, latitude first')
+                            + base_example.format('38.6374478,-121.3846125'))
+        selection = input('Are these the correct coordinates (Y/n)? {0}\n'.format(coordinates))
+        if selection.lower() != 'n':
+            is_unconfirmed = False
+            coordinates = coordinates.split(',')
+            new_row['latitude'] = coordinates[0]
+            if coordinates[1][0] == ' ':
+                new_row['longitude'] = coordinates[1][1:]
+            else:
+                new_row['longitude'] = coordinates[1]
+
+    is_unconfirmed = True
+    while is_unconfirmed:
+        selection = input('Is this record correct (y/N)? {0}\n'.format(new_row))
+        if selection.lower() == 'y':
+            is_unconfirmed = False
+            writer.writerow(new_row)
+            print('Record stored in the system!')
+        else:
+            # TODO Make a system to edit a specific value instead of just cancelling
+            selection = input('Are you sure you want to cancel (y/N)? Unsaved data will be lost\n')
+            if selection.lower() == 'y':
+                is_unconfirmed = False
+
+    file_write.close()
 
 
 # Helper function to format the date
@@ -320,6 +393,8 @@ def format_date(date_fragment_list):
 
     if len(date_fragment_list[0]) > 3:
         date_fragment_list[0] = months[date_fragment_list[0][:-1]] + '/'
+    elif date_fragment_list[0][0] == '0':
+        date_fragment_list[0] = date_fragment_list[0][1:]
 
     if len(date_fragment_list[1]) > 3:
         date_fragment_list[1] = date_fragment_list[1][:2] + '/'
@@ -328,12 +403,25 @@ def format_date(date_fragment_list):
         date_fragment_list[2] = date_fragment_list[2][-3:]
 
     if len(date_fragment_list[3]) > 3:
-        if date_fragment_list[3][-3:].upper() == 'AM:':
-            date_fragment_list[3] = date_fragment_list[3][:2] + ':'
+        if date_fragment_list[3][:2] == '12':
+            if date_fragment_list[3][-3:].upper() == 'AM:':
+                date_fragment_list[3] = '0:'
+            elif date_fragment_list[3][-3:].upper() == 'PM:':
+                date_fragment_list[3] = '12:'
+        elif date_fragment_list[3][-3:].upper() == 'AM:':
+            if date_fragment_list[3].__contains__(' '):
+                date_fragment_list[3] = date_fragment_list[3][:-4] + ':'
+            else:
+                date_fragment_list[3] = date_fragment_list[3][:-3] + ':'
         elif date_fragment_list[3][-3:].upper() == 'PM:':
-            date_fragment_list[3] = str(int(date_fragment_list[3][:2]) + 12) + ':'
+            if date_fragment_list[3].__contains__(' '):
+                date_fragment_list[3] = str(int(date_fragment_list[3][:-4]) + 12) + ':'
+            else:
+                date_fragment_list[3] = str(int(date_fragment_list[3][:-3]) + 12) + ':'
+        if len(date_fragment_list[3]) == 3 and date_fragment_list[3][0] == '0':
+            date_fragment_list[3] = date_fragment_list[3][1:]
 
-    if len(date_fragment_list[4]) == 2:
+    if len(date_fragment_list[4]) == 1:
         date_fragment_list[4] = '0' + date_fragment_list[4]
 
     date = ''
