@@ -106,7 +106,7 @@ def search_by_date():
                 else:
                     search_date += i
 
-        print('Searching for crimes registered on {0}...'.format(search_date))
+        print(f'Searching for crimes registered on {search_date}...')
         result_set = []
         file.seek(0)  # Resetting the iterator
         for row in reader:
@@ -366,7 +366,7 @@ def new_entry():
     while is_unconfirmed:
         coordinates = input(base_query.format('coordinates, latitude first')
                             + base_example.format('38.6374478,-121.3846125'))
-        selection = input('Are these the correct coordinates (Y/n)? {0}\n'.format(coordinates))
+        selection = input(f'Are these the correct coordinates (Y/n)? {coordinates}\n')
         if selection.lower() != 'n':
             is_unconfirmed = False
             coordinates = coordinates.split(',')
@@ -378,7 +378,7 @@ def new_entry():
 
     is_unconfirmed = True
     while is_unconfirmed:
-        selection = input('Is this record correct (y/N)? {0}\n'.format(new_row))
+        selection = input(f'Is this record correct (y/N)? {new_row}\n')
         if selection.lower() == 'y':
             is_unconfirmed = False
             writer.writerow(new_row)
@@ -400,12 +400,44 @@ def export_to_json():
     json_file = open('SacramentoCrimeDB.json', 'w')
     json_file.write(out)
     file_to_json.close()
-    print('CSV file export to JSON!')
+    print('CSV file exported to JSON!')
     os.remove('noHeader.csv')
 
 
 def export_to_html():
-    pass
+    file.seek(0)
+    file.__next__()
+    html = '<table>\n' \
+           '  <tr>\n' \
+        f'    <th>{fieldnames[0]}</th>\n' \
+        f'    <th>{fieldnames[1]}</th>\n' \
+        f'    <th>{fieldnames[2]}</th>\n' \
+        f'    <th>{fieldnames[3]}</th>\n' \
+        f'    <th>{fieldnames[4]}</th>\n' \
+        f'    <th>{fieldnames[5]}</th>\n' \
+        f'    <th>{fieldnames[6]}</th>\n' \
+        f'    <th>{fieldnames[7]}</th>\n' \
+        f'    <th>{fieldnames[8]}</th>\n' \
+           '  </tr>\n'
+
+    for row in reader:
+        html += '  <tr>\n' \
+        f'    <td>{row[0]}</td>\n' \
+        f'    <td>{row[1]}</td>\n' \
+        f'    <td>{row[2]}</td>\n' \
+        f'    <td>{row[3]}</td>\n' \
+        f'    <td>{row[4]}</td>\n' \
+        f'    <td>{row[5]}</td>\n' \
+        f'    <td>{row[6]}</td>\n' \
+        f'    <td>{row[7]}</td>\n' \
+        f'    <td>{row[8]}</td>\n' \
+           '  </tr>\n'
+
+    html += '</table>\n'
+    html_file = open('SacramentoCrimeDB.html', 'w')
+    html_file.write(html)
+    html_file.close()
+    print('CSV file exported to HTML!')
 
 
 # Helper function to format the date
