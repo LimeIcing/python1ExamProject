@@ -13,6 +13,7 @@
 #   formats, and should be able to export search results in json and and html
 #   formats as well.
 
+import os
 import csv
 import json
 
@@ -31,7 +32,7 @@ def welcome():
     }
     menu = '1 - Search for a crime in the archive\n' \
            '2 - Add a new record to the database\n' \
-           '3 - Export the database to json\n' \
+           '3 - Export the database to JSON\n' \
            '4 - Export the database to HTML\n' \
            '0 - Exit'
 
@@ -392,11 +393,15 @@ def new_entry():
 
 
 def export_to_json():
-    dict_reader = csv.DictReader(file, delimiter=',', fieldnames=fieldnames)
-    file.seek(1)
-    out = json.dumps([row for row in dict_reader])
+    remove_header_from_csv()
+    file_to_json = open('noHeader.csv', 'r')
+    dict_reader = csv.DictReader(file_to_json, delimiter=',', fieldnames=fieldnames)
+    out = json.dumps([row for row in dict_reader], indent=4)
     json_file = open('SacramentoCrimeDB.json', 'w')
     json_file.write(out)
+    file_to_json.close()
+    print('CSV file export to JSON!')
+    os.remove('noHeader.csv')
 
 
 def export_to_html():
@@ -454,6 +459,18 @@ def should_run(user_input):
         return False
     else:
         return True
+
+
+def remove_header_from_csv():
+    no_header = open('noHeader.csv', 'a')
+    writer = csv.writer(no_header, delimiter=',')
+    file.seek(0)
+    file.__next__()
+
+    for row in reader:
+        writer.writerow(row)
+
+    no_header.close()
 
 
 if __name__ == '__main__':
