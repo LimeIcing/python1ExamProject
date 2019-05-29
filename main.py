@@ -9,7 +9,7 @@
 # The application should furthermore be able to add new records to the dataset.
 #   (this includes writing to the csv file.)
 
-# TODO The application should be able to export the whole dataset into json and html
+# The application should be able to export the whole dataset into json and html
 #   formats, and should be able to export search results in json and and html
 #   formats as well.
 
@@ -18,9 +18,9 @@ import csv
 import json
 
 file = open('SacramentocrimeJanuary2006.csv', 'r')
-reader = csv.reader(file, delimiter=',')
 fieldnames = ['cdatetime', 'address', 'district', 'beat', 'grid',
               'crimedescr', 'ucr_ncic_code', 'latitude', 'longitude']
+reader = csv.DictReader(file, delimiter=',', fieldnames=fieldnames)
 
 
 def welcome():
@@ -110,16 +110,16 @@ def search_by_date():
         result_set = []
         file.seek(0)  # Resetting the iterator
         for row in reader:
-            if str(row[0]).startswith(search_date):
-                print(row)
+            if str(row[fieldnames[0]]).startswith(search_date):
+                print(json.dumps(row, indent=4))
                 result_set.append(row)
 
         selection = input('Do you want to specify the search with a time of day? (y/N)\n')
         if selection.lower() == 'y':
             input_hour = input('Please input the hour in 24h time\n')
             for row in result_set:
-                if str(row[0]).split(':')[0].endswith(input_hour):
-                    print(row)
+                if str(row[fieldnames[0]]).split(':')[0].endswith(input_hour):
+                    print(json.dumps(row, indent=4))
 
         selection = input('Do you want to search for a new date? (y/N)\n')
         if selection.lower() != 'y':
@@ -148,12 +148,12 @@ def search_by_address():
         file.seek(0)  # Resetting the iterator
         for row in reader:
             for keyword in input_address:
-                if list(row)[1].__contains__(keyword):
-                    print(row)
+                if row[fieldnames[1]].__contains__(keyword):
+                    print(json.dumps(row, indent=4))
                     break
                 elif list(address_abbreviations.keys()).__contains__(keyword):
-                    if list(row)[1].__contains__(address_abbreviations[keyword]):
-                        print(row)
+                    if row[fieldnames[1]].__contains__(address_abbreviations[keyword]):
+                        print(json.dumps(row, indent=4))
                         break
 
         selection = input('What do you want to do now?\n'
@@ -178,8 +178,8 @@ def search_by_district():
         input_district = input('Please input district number\n')
         file.seek(0)  # Resetting the iterator
         for row in reader:
-            if list(row)[2] == input_district:
-                print(row)
+            if row[fieldnames[2]] == input_district:
+                print(json.dumps(row, indent=4))
 
         selection = input('Do you wish to search in another district? (y/N)\n')
         if selection.lower() != 'y':
@@ -193,8 +193,8 @@ def search_by_beat():
         input_beat = input('Please input beat\n').upper()
         file.seek(0)  # Resetting the iterator
         for row in reader:
-            if list(row)[3] == input_beat:
-                print(row)
+            if str(row[fieldnames[3]]).startswith(input_beat):
+                print(json.dumps(row, indent=4))
 
         selection = input('Do you wish to search for another beat? (y/N)\n')
         if selection.lower() != 'y':
@@ -208,8 +208,8 @@ def search_by_grid():
         input_grid = input('Please input grid number\n')
         file.seek(0)  # Resetting the iterator
         for row in reader:
-            if list(row)[4] == input_grid:
-                print(row)
+            if row[fieldnames[4]] == input_grid:
+                print(json.dumps(row, indent=4))
 
         selection = input('Do you wish to search in another grid? (y/N)\n')
         if selection.lower() != 'y':
@@ -229,8 +229,8 @@ def search_by_description():
         file.seek(0)  # Resetting the iterator
         for row in reader:
             for keyword in input_description:
-                if list(row)[5].__contains__(keyword):
-                    print(row)
+                if row[fieldnames[5]].__contains__(keyword):
+                    print(json.dumps(row, indent=4))
                     break
 
         selection = input('What do you want to do now?\n'
@@ -255,8 +255,8 @@ def search_by_ucr():
         input_ucr = input('Please input UCR number\n')
         file.seek(0)  # Resetting the iterator
         for row in reader:
-            if list(row)[6] == input_ucr:
-                print(row)
+            if row[fieldnames[6]] == input_ucr:
+                print(json.dumps(row, indent=4))
 
         selection = input('Do you wish to search for another UCR number? (y/N)\n')
         if selection.lower() != 'y':
@@ -272,11 +272,11 @@ def search_by_radius():
         file.seek(0)  # Resetting the iterator
         file.__next__()  # Avoids the header row
         for row in reader:
-            if float(row[7]) - float(input_coordinate[0]) <= input_radius and \
-                    float(input_coordinate[0]) - float(row[7]) <= input_radius:
-                if float(row[8]) - float(input_coordinate[1]) <= input_radius and \
-                        float(input_coordinate[1]) - float(row[8]) <= input_radius:
-                    print(row)
+            if float(row[fieldnames[7]]) - float(input_coordinate[0]) <= input_radius and \
+                    float(input_coordinate[0]) - float(row[fieldnames[7]]) <= input_radius:
+                if float(row[fieldnames[8]]) - float(input_coordinate[1]) <= input_radius and \
+                        float(input_coordinate[1]) - float(row[fieldnames[8]]) <= input_radius:
+                    print(json.dumps(row, indent=4))
 
         selection = input('What do you want to do now?\n'
                           '1 - Input new coordinate\n'
@@ -422,16 +422,16 @@ def export_to_html():
 
     for row in reader:
         html += '  <tr>\n' \
-        f'    <td>{row[0]}</td>\n' \
-        f'    <td>{row[1]}</td>\n' \
-        f'    <td>{row[2]}</td>\n' \
-        f'    <td>{row[3]}</td>\n' \
-        f'    <td>{row[4]}</td>\n' \
-        f'    <td>{row[5]}</td>\n' \
-        f'    <td>{row[6]}</td>\n' \
-        f'    <td>{row[7]}</td>\n' \
-        f'    <td>{row[8]}</td>\n' \
-           '  </tr>\n'
+            f'    <td>{row[0]}</td>\n' \
+            f'    <td>{row[1]}</td>\n' \
+            f'    <td>{row[2]}</td>\n' \
+            f'    <td>{row[3]}</td>\n' \
+            f'    <td>{row[4]}</td>\n' \
+            f'    <td>{row[5]}</td>\n' \
+            f'    <td>{row[6]}</td>\n' \
+            f'    <td>{row[7]}</td>\n' \
+            f'    <td>{row[8]}</td>\n' \
+            '  </tr>\n'
 
     html += '</table>\n'
     html_file = open('SacramentoCrimeDB.html', 'w')
