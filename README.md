@@ -6,7 +6,7 @@
 
 ## How to run
 ### Bash
-Simply type the following in your `bash` console while being in the `python1ExamProject` folder:
+Simply type the following in your `bash` terminal while being in the `python1ExamProject` folder:
 
 ````bash
 python3.7 main.py
